@@ -42,8 +42,8 @@ public class Event {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "organizer_id")
-    private User organizer;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "venue_id")
@@ -52,7 +52,7 @@ public class Event {
     @OneToMany(mappedBy = "event")
     private List<Review> reviews;
 
-    @ManyToMany(mappedBy = "event")
+    @ManyToMany
     @JoinTable(name = "event_category")
     private List<Category> categories;
 
