@@ -1,7 +1,5 @@
 package com.example.EventBookingPlatform.service;
 
-import com.example.EventBookingPlatform.dto.AuthResponse;
-import com.example.EventBookingPlatform.dto.UserLoginRequest;
 import com.example.EventBookingPlatform.dto.UserRegisterRequest;
 import com.example.EventBookingPlatform.dto.UserRegisterResponse;
 import com.example.EventBookingPlatform.entity.Role;
@@ -9,6 +7,9 @@ import com.example.EventBookingPlatform.entity.User;
 import com.example.EventBookingPlatform.exception.UserNotFoundException;
 import com.example.EventBookingPlatform.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -53,6 +54,40 @@ public class UserService {
         return response;
     }
 
+    public UserRegisterResponse registerOrganizer(UserRegisterRequest request) {
+
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        if (request.getEmail() == null || !request.getEmail().contains("@")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+
+        //create entity
+        User userEntity = new User();
+        userEntity.setUsername(request.getUsername());
+        userEntity.setEmail(request.getEmail());
+        userEntity.setPassword(request.getPassword()); // TODO: Hash this with BCrypt
+        userEntity.setRole(Role.ORGANIZER);
+
+        userRepository.save(userEntity);
+
+        // User response is used to return
+        UserRegisterResponse response = new UserRegisterResponse();
+        response.setId(userEntity.getId());
+        response.setUsername(userEntity.getUsername());
+        response.setEmail(userEntity.getEmail());
+        response.setRole(userEntity.getRole().toString());
+
+        return response;
+    }
+
     /*TODO
         configure jwt before doing log in
      */
@@ -60,24 +95,35 @@ public class UserService {
 //
 //    }
 
-    public User findByEmail(String email) {
+    public UserRegisterResponse getByEmail(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        return user;
+        UserRegisterResponse response = new UserRegisterResponse();
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole().toString());
+        return response;
 
     }
 
-    public User findById(Long id){
+    public UserRegisterResponse getById(Long id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        return user;
+        UserRegisterResponse response = new UserRegisterResponse();
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole().toString());
+
+        return response;
     }
 
     public UserRegisterResponse  updateUser(Long id, UserRegisterRequest request) {
 
-        User user = findById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
@@ -107,5 +153,30 @@ public class UserService {
         response.setRole(user.getRole().toString());
         return response;
 
+    }
+
+    public void deleteUserById(Long id){
+
+        if(userRepository.findById(id).isPresent()){
+            userRepository.deleteById(id);
+        }else {
+            throw new UserNotFoundException("User not found");
+        }
+
+    }
+
+    public List<UserRegisterResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<UserRegisterResponse> responses = new ArrayList<>();
+
+        for (User user : users) {
+            UserRegisterResponse response = new UserRegisterResponse();
+            response.setId(user.getId());
+            response.setUsername(user.getUsername());
+            response.setEmail(user.getEmail());
+            response.setRole(user.getRole().toString());
+            responses.add(response);
+        }
+        return responses;
     }
 }
