@@ -169,7 +169,7 @@ public class EventService {
 
 
 
-    public EventResponse eventToResponse(Event event) {
+    private EventResponse eventToResponse(Event event) {
 
         EventResponse response = new EventResponse();
 

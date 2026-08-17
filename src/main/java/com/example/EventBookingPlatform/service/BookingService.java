@@ -3,6 +3,7 @@ package com.example.EventBookingPlatform.service;
 import com.example.EventBookingPlatform.dto.BookingRequest;
 import com.example.EventBookingPlatform.dto.BookingResponse;
 import com.example.EventBookingPlatform.entity.*;
+import com.example.EventBookingPlatform.exception.BookingNotFoundException;
 import com.example.EventBookingPlatform.exception.EventNotFoundException;
 import com.example.EventBookingPlatform.exception.UserNotFoundException;
 import com.example.EventBookingPlatform.repository.BookingRepository;
@@ -11,6 +12,8 @@ import com.example.EventBookingPlatform.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class BookingService {
@@ -27,7 +30,7 @@ public class BookingService {
 
     //create read update delete
 
-    public BookingResponse bookAnEvent(BookingRequest bookingRequest, Long userId) {
+    public BookingResponse createBooking(BookingRequest bookingRequest, Long userId) {
         Event event = eventRepository.findById(bookingRequest.getEventId())
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
         User user = userRepository.findById(userId)
@@ -61,8 +64,78 @@ public class BookingService {
     }
 
 
+    public BookingResponse cancelBooking(Long bookingId, Long userId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
 
-    public BookingResponse bookingToResponse(Booking booking) {
+        if (!booking.getUser().getId().equals(userId)) {
+            throw new BookingNotFoundException("Booking not found");
+        }
+
+        Event event = booking.getEvent();
+        event.setAvailableSeats(event.getAvailableSeats() + booking.getSeatsBooked());
+        if (event.getStatus() == Status.SOLD_OUT) {
+            event.setStatus(Status.AVAILABLE);
+        }
+        eventRepository.save(event);
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+        return bookingToResponse(booking);
+    }
+
+    public BookingResponse getBookingById(Long bookingId){
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+        return bookingToResponse(booking);
+    }
+
+    public List<BookingResponse> getBookingsByUser(Long userId){
+        List<Booking> bookings = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"))
+                .getBookings();
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        for (Booking booking : bookings) {
+            BookingResponse bookingResponse = bookingToResponse(booking);
+            bookingResponses.add(bookingResponse);
+        }
+        return bookingResponses;
+    }
+
+    public List<BookingResponse> getBookingsByEvent(Long eventId){
+        List<Booking> bookings = eventRepository.findById(eventId)
+                        .orElseThrow(() -> new EventNotFoundException("Event not found"))
+                            .getBookings();
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        for (Booking booking : bookings) {
+            BookingResponse bookingResponse = bookingToResponse(booking);
+            bookingResponses.add(bookingResponse);
+        }
+        return bookingResponses;
+    }
+
+    public List<BookingResponse> geAllBookings() {
+        List<Booking> bookings = bookingRepository.findAll();
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        for (Booking booking : bookings) {
+            BookingResponse bookingResponse = bookingToResponse(booking);
+            bookingResponses.add(bookingResponse);
+        }
+        return bookingResponses;
+    }
+
+    public BookingResponse adminCancelBooking(Long bookingId){
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+        return bookingToResponse(booking);
+
+    }
+
+
+    private BookingResponse bookingToResponse(Booking booking) {
         BookingResponse response = new BookingResponse();
         response.setId(booking.getId());
         response.setEventTitle(booking.getEvent().getTitle());
