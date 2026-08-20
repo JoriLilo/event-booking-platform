@@ -18,16 +18,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/auth/register")
-    public ResponseEntity<UserRegisterResponse> register(@RequestBody UserRegisterRequest userRegisterRequest) {
-
-        return new ResponseEntity<>(userService.register(userRegisterRequest), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/auth/register-organizer")
-    public ResponseEntity<UserRegisterResponse> registerOrganizer(@RequestBody UserRegisterRequest userRegisterRequest) {
-        return new ResponseEntity<>(userService.registerOrganizer(userRegisterRequest), HttpStatus.CREATED);
-    }
 
     @GetMapping("/users")
     public ResponseEntity<List<UserRegisterResponse>> getAllUsers() {
