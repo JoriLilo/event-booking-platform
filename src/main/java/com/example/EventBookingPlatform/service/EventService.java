@@ -11,6 +11,7 @@ import com.example.EventBookingPlatform.repository.CategoryRepository;
 import com.example.EventBookingPlatform.repository.EventRepository;
 import com.example.EventBookingPlatform.repository.UserRepository;
 import com.example.EventBookingPlatform.repository.VenueRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -82,9 +83,19 @@ public class EventService {
     }
 
 
-    public EventResponse updateEventStatus(Long eventId, Status status) {
-        Event event= eventRepository.findById(eventId)
+    public EventResponse updateEventStatus(Long eventId, Status status, String organizerEmail) {
+
+        Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
+
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new UserNotFoundException("Organizer not found"));
+
+        if (!event.getUser().getId().equals(organizer.getId())) {
+            throw new AccessDeniedException(
+                    "You are not allowed to update this event"
+            );
+        }
 
         event.setStatus(status);
         eventRepository.save(event);

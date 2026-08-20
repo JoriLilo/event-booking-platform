@@ -36,8 +36,8 @@ public class ReviewService {
         this.bookingRepository = bookingRepository;
     }
 
-    public ReviewResponse createReview(ReviewRequest reviewRequest, Long userId, Long eventId) {
-        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException("this user does not exist"));
+    public ReviewResponse createReview(ReviewRequest reviewRequest, String userEmail, Long eventId) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new UserNotFoundException("this user does not exist"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
         Optional<Review> review = reviewRepository.findByUserAndEvent(user, event);
