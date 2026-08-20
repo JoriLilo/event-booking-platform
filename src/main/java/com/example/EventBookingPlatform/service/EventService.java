@@ -7,10 +7,7 @@ import com.example.EventBookingPlatform.entity.Status;
 import com.example.EventBookingPlatform.entity.User;
 import com.example.EventBookingPlatform.exception.EventNotFoundException;
 import com.example.EventBookingPlatform.exception.UserNotFoundException;
-import com.example.EventBookingPlatform.repository.CategoryRepository;
-import com.example.EventBookingPlatform.repository.EventRepository;
-import com.example.EventBookingPlatform.repository.UserRepository;
-import com.example.EventBookingPlatform.repository.VenueRepository;
+import com.example.EventBookingPlatform.repository.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -26,17 +23,17 @@ public class EventService {
     private final VenueRepository venueRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
-    public EventService(EventRepository eventRepository, VenueRepository venueRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
+    public EventService(EventRepository eventRepository, VenueRepository venueRepository, CategoryRepository categoryRepository, UserRepository userRepository, ReviewRepository reviewRepository) {
         this.eventRepository = eventRepository;
         this.venueRepository = venueRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
     }
 
-
-
-    public EventResponse createEvent(EventRequest eventRequest,String organizerUsername) {
+    public EventResponse createEvent(EventRequest eventRequest, String organizerUsername) {
 
         if (eventRequest.getTitle() == null || eventRequest.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -196,6 +193,7 @@ public class EventService {
                         .map(category -> category.getCategoryName())
                         .collect(Collectors.toList())
         );
+        response.setAverageRating(reviewRepository.getAverageRatingForEvent(event.getId()));
         response.setVenueName(event.getVenue().getName());
         response.setStatus(event.getStatus().toString());
         response.setOrganizerUsername(event.getUser().getUsername());

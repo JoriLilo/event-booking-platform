@@ -29,7 +29,12 @@ public class ReviewService {
     private final EventRepository eventRepository;
     private final BookingRepository bookingRepository;
 
-    public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository, EventRepository eventRepository,BookingRepository bookingRepository) {
+    public ReviewService(
+            ReviewRepository reviewRepository,
+            UserRepository userRepository,
+            EventRepository eventRepository,
+            BookingRepository bookingRepository) {
+
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
@@ -37,23 +42,30 @@ public class ReviewService {
     }
 
     public ReviewResponse createReview(ReviewRequest reviewRequest, String userEmail, Long eventId) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new UserNotFoundException("this user does not exist"));
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("this user does not exist"));
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
+
         Optional<Review> review = reviewRepository.findByUserAndEvent(user, event);
+
         if (review.isPresent()) {
             throw new ReviewAlreadyExistsException("Review already exists");
         }
-        if(reviewRequest.getComment() == null || reviewRequest.getComment().isEmpty()) {
+        if (reviewRequest.getComment() == null || reviewRequest.getComment().isEmpty()) {
             throw new IllegalArgumentException("Comment cannot be empty");
         }
-        if(reviewRequest.getComment().length() > 250) {
+
+        if (reviewRequest.getComment().length() > 250) {
             throw new IllegalArgumentException("Comment cannot be longer than 250 characters");
         }
-        if(reviewRequest.getComment().length() < 5) {
+
+        if (reviewRequest.getComment().length() < 5) {
             throw new IllegalArgumentException("Comment cannot be shorter than 5 characters");
         }
-        if (reviewRequest.getRating() == null ) {
+
+        if (reviewRequest.getRating() == null) {
             throw new IllegalArgumentException("Rating cannot be empty");
         }
 
@@ -62,19 +74,23 @@ public class ReviewService {
         }
 
         boolean hasConfirmedBooking = bookingRepository.existsByUserAndEventAndStatus(user, event, BookingStatus.CONFIRMED);
+
         if (!hasConfirmedBooking) {
             throw new IllegalArgumentException("You must have a confirmed booking for this event to review it");
         }
+
         if (event.getEndDateTime() == null || event.getEndDateTime().isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("You can only review an event after it has taken place");
         }
 
         Review reviewEntity = new Review();
+
         reviewEntity.setEvent(event);
         reviewEntity.setRating(reviewRequest.getRating());
         reviewEntity.setComment(reviewRequest.getComment());
         reviewEntity.setCreatedAt(LocalDateTime.now());
         reviewEntity.setUser(user);
+
         reviewRepository.save(reviewEntity);
 
         return reviewToResponse(reviewEntity);
@@ -82,58 +98,86 @@ public class ReviewService {
 
 
     public ReviewResponse getReviewById(Long reviewId) {
+
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException("Review not found"));
+
         return reviewToResponse(review);
     }
 
+
     public List<ReviewResponse> getReviewsByEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+
         List<Review> reviews = reviewRepository.findByEvent(event);
+
         List<ReviewResponse> responses = new ArrayList<>();
+
         for (Review review : reviews) {
             responses.add(reviewToResponse(review));
-
         }
+
         return responses;
     }
 
-    public List<ReviewResponse> getReviewsByUser(Long userId) {
-        User user = userRepository.findById(userId)
+
+    public List<ReviewResponse> getReviewsByUser(String userEmail) {
+
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("this user does not exist"));
 
         List<Review> reviews = reviewRepository.findByUser(user);
+
         List<ReviewResponse> responses = new ArrayList<>();
+
         for (Review review : reviews) {
             responses.add(reviewToResponse(review));
         }
+
         return responses;
     }
 
-    public void deleteReviewById(Long reviewId) {
+
+    public void deleteReviewById(Long reviewId, String userEmail) {
+
         Review review = reviewRepository.findById(reviewId)
-                        .orElseThrow(() -> new ReviewNotFoundException("Review not found"));
-        reviewRepository.deleteById(reviewId);
-    }
+                .orElseThrow(() -> new ReviewNotFoundException("Review not found"));
 
-    public float getAverageRatingForEvent(Long eventId) {
-        List<ReviewResponse> responses = getReviewsByEvent(eventId);
-        float averageRating = 0;
-        for (ReviewResponse reviewResponse : responses) {
-            averageRating += reviewResponse.getRating();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("this user does not exist"));
 
+        if (!review.getUser().getId().equals(user.getId())) {
+            throw new ReviewNotFoundException("Review not found");
         }
-        return averageRating / responses.size();
+
+        reviewRepository.delete(review);
     }
+
+
+    public Double getAverageRatingForEvent(Long eventId) {
+
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+
+        Double averageRating = reviewRepository.getAverageRatingForEvent(eventId);
+
+        return averageRating != null ? averageRating : 0.0;
+    }
+
 
     public ReviewResponse reviewToResponse(Review review) {
+
         ReviewResponse response = new ReviewResponse();
+
         response.setId(review.getId());
         response.setEventTitle(review.getEvent().getTitle());
         response.setReviewerUsername(review.getUser().getUsername());
         response.setRating(review.getRating());
         response.setComment(review.getComment());
         response.setCreatedAt(review.getCreatedAt());
+
         return response;
     }
 }

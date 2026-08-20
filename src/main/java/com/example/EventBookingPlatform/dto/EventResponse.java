@@ -17,6 +17,7 @@ public class EventResponse {
     private Long id;
     private String title;
     private String description;
+    private Double averageRating;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private float price;
@@ -25,4 +26,5 @@ public class EventResponse {
     private String organizerUsername;
     private String venueName;
     private List<String> categoryNames;
+
 }

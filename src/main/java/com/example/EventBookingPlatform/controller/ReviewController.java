@@ -39,22 +39,24 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.getReviewsByEvent(eventId), HttpStatus.OK);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReviewResponse>> getReviewsByUser(@PathVariable Long userId) {
+    @GetMapping("/user")
+    public ResponseEntity<List<ReviewResponse>> getReviewsByUser(Authentication authentication) {
 
-        return new ResponseEntity<>(reviewService.getReviewsByUser(userId), HttpStatus.OK);
+        String userEmail = authentication.getName();
+
+        return new ResponseEntity<>(reviewService.getReviewsByUser(userEmail), HttpStatus.OK);
     }
-
     @DeleteMapping("/{reviewId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteReviewById(@PathVariable Long reviewId) {
+    public ResponseEntity<Void> deleteReviewById(@PathVariable Long reviewId, Authentication authentication) {
 
-        reviewService.deleteReviewById(reviewId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        String userEmail = authentication.getName();
+        reviewService.deleteReviewById(reviewId, userEmail);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/event/{eventId}/average-rating")
-    public ResponseEntity<Float> getAverageRatingForEvent(@PathVariable Long eventId) {
+    public ResponseEntity<Double> getAverageRatingForEvent(@PathVariable Long eventId) {
 
         return new ResponseEntity<>(reviewService.getAverageRatingForEvent(eventId), HttpStatus.OK);
     }
