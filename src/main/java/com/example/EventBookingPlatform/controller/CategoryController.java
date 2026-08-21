@@ -3,6 +3,7 @@ package com.example.EventBookingPlatform.controller;
 import com.example.EventBookingPlatform.dto.CategoryRequest;
 import com.example.EventBookingPlatform.dto.CategoryResponse;
 import com.example.EventBookingPlatform.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,20 +16,27 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest categoryRequest) {
+    public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
         return new ResponseEntity<>(categoryService.createCategory(categoryRequest), HttpStatus.CREATED);
     }
 
     @PutMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long categoryId, @RequestBody CategoryRequest categoryRequest) {
-        return new ResponseEntity<>(categoryService.updateCategory(categoryId, categoryRequest), HttpStatus.OK);
+    public ResponseEntity<CategoryResponse> updateCategory(
+            @PathVariable Long categoryId,
+            @Valid @RequestBody CategoryRequest categoryRequest) {
+
+        return new ResponseEntity<>(
+                categoryService.updateCategory(categoryId, categoryRequest),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/{categoryId}")
@@ -47,5 +55,4 @@ public class CategoryController {
         categoryService.deleteCategory(categoryId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

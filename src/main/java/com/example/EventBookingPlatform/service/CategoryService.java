@@ -6,6 +6,7 @@ import com.example.EventBookingPlatform.entity.Category;
 import com.example.EventBookingPlatform.exception.CategoryNotFoundException;
 import com.example.EventBookingPlatform.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
 
         if (categoryRequest.getCategoryName() == null || categoryRequest.getCategoryName().trim().isEmpty()) {
@@ -33,6 +35,7 @@ public class CategoryService {
         return response;
     }
 
+    @Transactional
     public CategoryResponse updateCategory(Long categoryId, CategoryRequest categoryRequest) {
         if (categoryRequest.getCategoryName() == null || categoryRequest.getCategoryName().trim().isEmpty()) {
             throw new IllegalArgumentException("Category name cannot be empty");
@@ -68,6 +71,7 @@ public class CategoryService {
         return responses;
     }
 
+    @Transactional
     public void deleteCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));

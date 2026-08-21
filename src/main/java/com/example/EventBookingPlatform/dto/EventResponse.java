@@ -22,9 +22,9 @@ public class EventResponse {
     private LocalDateTime endDateTime;
     private float price;
     private int totalSeats;
+    private int availableSeats;
     private String status;
     private String organizerUsername;
     private String venueName;
     private List<String> categoryNames;
-
 }

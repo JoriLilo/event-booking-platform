@@ -1,6 +1,5 @@
 package com.example.EventBookingPlatform.dto;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,12 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingRequest {
+public class WaitlistRequest {
 
-    @NotNull
+    @NotNull(message = "Event ID is required")
     private Long eventId;
-
-    @NotNull
-    @Min(value = 1)
-    private int seatsBooked;
 }

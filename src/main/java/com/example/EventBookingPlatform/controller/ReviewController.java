@@ -3,9 +3,9 @@ package com.example.EventBookingPlatform.controller;
 import com.example.EventBookingPlatform.dto.ReviewRequest;
 import com.example.EventBookingPlatform.dto.ReviewResponse;
 import com.example.EventBookingPlatform.service.ReviewService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +22,16 @@ public class ReviewController {
     }
 
     @PostMapping("/event/{eventId}")
-    public ResponseEntity<ReviewResponse> createReview(@PathVariable Long eventId, @RequestBody ReviewRequest reviewRequest, Authentication authentication) {
+    public ResponseEntity<ReviewResponse> createReview(
+            @PathVariable Long eventId,
+            @Valid @RequestBody ReviewRequest reviewRequest,
+            Authentication authentication) {
+
         String userEmail = authentication.getName();
-        return new ResponseEntity<>(reviewService.createReview(reviewRequest, userEmail, eventId), HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                reviewService.createReview(reviewRequest, userEmail, eventId),
+                HttpStatus.CREATED
+        );
     }
 
     @GetMapping("/{reviewId}")
@@ -46,8 +53,11 @@ public class ReviewController {
 
         return new ResponseEntity<>(reviewService.getReviewsByUser(userEmail), HttpStatus.OK);
     }
+
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Void> deleteReviewById(@PathVariable Long reviewId, Authentication authentication) {
+    public ResponseEntity<Void> deleteReviewById(
+            @PathVariable Long reviewId,
+            Authentication authentication) {
 
         String userEmail = authentication.getName();
         reviewService.deleteReviewById(reviewId, userEmail);

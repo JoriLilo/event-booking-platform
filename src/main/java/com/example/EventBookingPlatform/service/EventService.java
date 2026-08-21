@@ -8,8 +8,11 @@ import com.example.EventBookingPlatform.entity.User;
 import com.example.EventBookingPlatform.exception.EventNotFoundException;
 import com.example.EventBookingPlatform.exception.UserNotFoundException;
 import com.example.EventBookingPlatform.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ public class EventService {
         this.reviewRepository = reviewRepository;
     }
 
+    @Transactional
     public EventResponse createEvent(EventRequest eventRequest, String organizerUsername) {
 
         if (eventRequest.getTitle() == null || eventRequest.getTitle().trim().isEmpty()) {
@@ -57,7 +61,6 @@ public class EventService {
             throw new IllegalArgumentException("Venue is required");
         }
 
-
         Event event = new Event();
         event.setTitle(eventRequest.getTitle());
         event.setDescription(eventRequest.getDescription());
@@ -65,6 +68,7 @@ public class EventService {
         event.setEndDateTime(eventRequest.getEndDateTime());
         event.setPrice(eventRequest.getPrice());
         event.setTotalSeats(eventRequest.getTotalSeats());
+        event.setAvailableSeats(eventRequest.getTotalSeats());
         event.setVenue(venueRepository.findById(eventRequest.getVenueId())
                 .orElseThrow(() -> new IllegalArgumentException("Venue not found")));
         event.setCategories(categoryRepository.findAllById(eventRequest.getCategoryIds()));
@@ -79,19 +83,17 @@ public class EventService {
         return response;
     }
 
-
-    public EventResponse updateEventStatus(Long eventId, Status status, String organizerEmail) {
+    @Transactional
+    public EventResponse updateEventStatus(Long eventId, Status status, String organizerUsername) {
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
-        User organizer = userRepository.findByEmail(organizerEmail)
+        User organizer = userRepository.findByUsername(organizerUsername)
                 .orElseThrow(() -> new UserNotFoundException("Organizer not found"));
 
         if (!event.getUser().getId().equals(organizer.getId())) {
-            throw new AccessDeniedException(
-                    "You are not allowed to update this event"
-            );
+            throw new AccessDeniedException("You are not allowed to update this event");
         }
 
         event.setStatus(status);
@@ -119,16 +121,35 @@ public class EventService {
 
         EventResponse response = eventToResponse(event);
         return response;
-
     }
 
-
+    @Transactional
     public EventResponse updateEvent(Long eventId, EventRequest eventRequest, String organizerUsername){
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(()-> new EventNotFoundException("Event not found"));
 
         if (!event.getUser().getUsername().equals(organizerUsername)) {
             throw new IllegalArgumentException("You are not the organizer of this event");
+        }
+
+        // Re-validate fields
+        if (eventRequest.getTitle() == null || eventRequest.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+        if (eventRequest.getStartDateTime() == null) {
+            throw new IllegalArgumentException("Start date/time is required");
+        }
+        if (eventRequest.getStartDateTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Start date/time cannot be in the past");
+        }
+        if (eventRequest.getEndDateTime() != null && eventRequest.getEndDateTime().isBefore(eventRequest.getStartDateTime())) {
+            throw new IllegalArgumentException("End date/time cannot be before start date/time");
+        }
+        if (eventRequest.getPrice() < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
+        }
+        if (eventRequest.getTotalSeats() <= 0) {
+            throw new IllegalArgumentException("Total seats must be greater than zero");
         }
 
         event.setTitle(eventRequest.getTitle());
@@ -145,10 +166,9 @@ public class EventService {
 
         EventResponse response = eventToResponse(event);
         return response;
-
     }
 
-
+    @Transactional
     public void deleteEvent(Long eventId, String organizerUsername) {
         User organizer = userRepository.findByUsername(organizerUsername)
                 .orElseThrow(() -> new UserNotFoundException(" User not found "));
@@ -158,7 +178,6 @@ public class EventService {
 
         eventRepository.delete(event);
     }
-
 
     public List<EventResponse> getEventsByOrganizer(String organizerUsername){
 
@@ -174,8 +193,43 @@ public class EventService {
         return responses;
     }
 
+    // SEARCH AND FILTER METHODS
 
+    public Page<EventResponse> searchEvents(String searchTerm, Pageable pageable) {
+        Page<Event> events = eventRepository.searchByTitleOrDescription(searchTerm, pageable);
+        return events.map(this::eventToResponse);
+    }
 
+    public Page<EventResponse> filterByDateRange(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Event> events = eventRepository.findByDateRange(startDate, endDate, pageable);
+        return events.map(this::eventToResponse);
+    }
+
+    public Page<EventResponse> filterByPriceRange(float minPrice, float maxPrice, Pageable pageable) {
+        Page<Event> events = eventRepository.findByPriceRange(minPrice, maxPrice, pageable);
+        return events.map(this::eventToResponse);
+    }
+
+    public Page<EventResponse> filterByCategory(Long categoryId, Pageable pageable) {
+        Page<Event> events = eventRepository.findByCategory(categoryId, pageable);
+        return events.map(this::eventToResponse);
+    }
+
+    public Page<EventResponse> searchWithFilters(String searchTerm, LocalDateTime startDate, LocalDateTime endDate, float minPrice, float maxPrice, Pageable pageable) {
+        Page<Event> events = eventRepository.searchWithFilters(
+                searchTerm, startDate, endDate, minPrice, maxPrice, pageable);
+        return events.map(this::eventToResponse);
+    }
+
+    public Page<EventResponse> getUpcomingEvents(Pageable pageable) {
+        Page<Event> events = eventRepository.findUpcomingEvents(LocalDateTime.now(), pageable);
+        return events.map(this::eventToResponse);
+    }
+
+    public Page<EventResponse> getEventsByVenue(Long venueId, Pageable pageable) {
+        Page<Event> events = eventRepository.findByVenue(venueId, pageable);
+        return events.map(this::eventToResponse);
+    }
 
     private EventResponse eventToResponse(Event event) {
 
@@ -188,6 +242,7 @@ public class EventService {
         response.setEndDateTime(event.getEndDateTime());
         response.setPrice(event.getPrice());
         response.setTotalSeats(event.getTotalSeats());
+        response.setAvailableSeats(event.getAvailableSeats());
         response.setCategoryNames(
                 event.getCategories().stream()
                         .map(category -> category.getCategoryName())

@@ -3,6 +3,7 @@ package com.example.EventBookingPlatform.controller;
 import com.example.EventBookingPlatform.dto.VenueRequest;
 import com.example.EventBookingPlatform.dto.VenueResponse;
 import com.example.EventBookingPlatform.service.VenueService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ public class VenueController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VenueResponse> addVenue(@RequestBody VenueRequest venueRequest) {
+    public ResponseEntity<VenueResponse> addVenue(@Valid @RequestBody VenueRequest venueRequest) {
         return new ResponseEntity<>(venueService.addVenue(venueRequest), HttpStatus.CREATED);
     }
 
@@ -38,14 +39,20 @@ public class VenueController {
 
     @PutMapping("/{venueId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VenueResponse> updateVenue(@PathVariable Long venueId, @RequestBody VenueRequest venueRequest) {
+    public ResponseEntity<VenueResponse> updateVenue(
+            @PathVariable Long venueId,
+            @Valid @RequestBody VenueRequest venueRequest) {
+
         return new ResponseEntity<>(venueService.updateVenue(venueId, venueRequest), HttpStatus.OK);
     }
 
     @PatchMapping("/{venueId}/capacity")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VenueResponse> updateVenueCapacity(@PathVariable Long venueId, @RequestParam int  capacity) {
-        return new ResponseEntity<>(venueService.updateVenueCapacity(venueId,capacity), HttpStatus.OK);
+    public ResponseEntity<VenueResponse> updateVenueCapacity(
+            @PathVariable Long venueId,
+            @RequestParam int capacity) {
+
+        return new ResponseEntity<>(venueService.updateVenueCapacity(venueId, capacity), HttpStatus.OK);
     }
 
     @DeleteMapping("/{venueId}")

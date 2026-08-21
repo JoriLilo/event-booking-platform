@@ -23,4 +23,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     WHERE r.event.id = :eventId
 """)
     Double getAverageRatingForEvent(@Param("eventId") Long eventId);
+
+    List<Review> findByUser(User user);
 }

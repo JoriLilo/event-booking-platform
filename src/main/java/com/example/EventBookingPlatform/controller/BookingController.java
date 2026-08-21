@@ -23,7 +23,10 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody BookingRequest bookingRequest, Authentication authentication) {
+    public ResponseEntity<BookingResponse> createBooking(
+            @Valid @RequestBody BookingRequest bookingRequest,
+            Authentication authentication) {
+
         String userEmail = authentication.getName();
         BookingResponse bookingResponse = bookingService.createBooking(bookingRequest, userEmail);
 
@@ -31,7 +34,9 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long bookingId, Authentication authentication) {
+    public ResponseEntity<BookingResponse> cancelBooking(
+            @PathVariable Long bookingId,
+            Authentication authentication) {
 
         String userEmail = authentication.getName();
         return new ResponseEntity<>(bookingService.cancelBooking(bookingId, userEmail), HttpStatus.OK);

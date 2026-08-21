@@ -10,6 +10,7 @@ import com.example.EventBookingPlatform.repository.BookingRepository;
 import com.example.EventBookingPlatform.repository.EventRepository;
 import com.example.EventBookingPlatform.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,27 +22,23 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final WaitlistService waitlistService;
 
-    public BookingService(
-            BookingRepository bookingRepository,
-            EventRepository eventRepository,
-            UserRepository userRepository) {
-
+    public BookingService(BookingRepository bookingRepository, EventRepository eventRepository, UserRepository userRepository, WaitlistService waitlistService) {
         this.bookingRepository = bookingRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.waitlistService = waitlistService;
     }
 
-
+    @Transactional
     public BookingResponse createBooking(BookingRequest bookingRequest, String userEmail) {
 
         Event event = eventRepository.findById(bookingRequest.getEventId())
-                .orElseThrow(() ->
-                        new EventNotFoundException("Event not found"));
+                .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() ->
-                        new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (bookingRequest.getSeatsBooked() <= 0) {
             throw new IllegalArgumentException("Seats booked must be greater than zero");
@@ -57,6 +54,11 @@ public class BookingService {
 
         event.setAvailableSeats(event.getAvailableSeats() - bookingRequest.getSeatsBooked());
 
+        // Set status to SOLD_OUT if no seats remain
+        if (event.getAvailableSeats() == 0) {
+            event.setStatus(Status.SOLD_OUT);
+        }
+
         eventRepository.save(event);
 
         Booking booking = new Booking();
@@ -71,7 +73,7 @@ public class BookingService {
         return bookingToResponse(booking);
     }
 
-
+    @Transactional
     public BookingResponse cancelBooking(Long bookingId, String userEmail) {
 
         Booking booking = bookingRepository.findById(bookingId)
@@ -79,7 +81,6 @@ public class BookingService {
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-
 
         if (!booking.getUser().getId().equals(user.getId())) {
             throw new BookingNotFoundException("Booking not found");
@@ -98,9 +99,11 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
+        // Promote from waitlist if available seats opened up
+        waitlistService.promoteFromWaitlist(event.getId());
+
         return bookingToResponse(booking);
     }
-
 
     public BookingResponse getBookingById(Long bookingId) {
 
@@ -109,7 +112,6 @@ public class BookingService {
 
         return bookingToResponse(booking);
     }
-
 
     public List<BookingResponse> getBookingsByUser(String userEmail) {
 
@@ -128,7 +130,6 @@ public class BookingService {
         return bookingResponses;
     }
 
-
     public List<BookingResponse> getBookingsByEvent(Long eventId) {
 
         List<Booking> bookings = eventRepository.findById(eventId)
@@ -145,7 +146,6 @@ public class BookingService {
         return bookingResponses;
     }
 
-
     public List<BookingResponse> geAllBookings() {
 
         List<Booking> bookings = bookingRepository.findAll();
@@ -160,7 +160,7 @@ public class BookingService {
         return bookingResponses;
     }
 
-
+    @Transactional
     public BookingResponse adminCancelBooking(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
@@ -170,9 +170,11 @@ public class BookingService {
 
         bookingRepository.save(booking);
 
+        // Promote from waitlist
+        waitlistService.promoteFromWaitlist(booking.getEvent().getId());
+
         return bookingToResponse(booking);
     }
-
 
     private BookingResponse bookingToResponse(Booking booking) {
 

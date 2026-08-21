@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class UserService {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional
     public UserRegisterResponse register(UserRegisterRequest request) {
 
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
@@ -59,6 +61,7 @@ public class UserService {
         return userToUserRegisterResponse(userEntity);
     }
 
+    @Transactional
     public UserRegisterResponse registerOrganizer(UserRegisterRequest request) {
 
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
@@ -90,7 +93,6 @@ public class UserService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-
         String token = jwtUtil.generateToken(request.getEmail());
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -117,10 +119,10 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-
         return userToUserRegisterResponse(user);
     }
 
+    @Transactional
     public UserRegisterResponse updateUser(Long id, UserRegisterRequest request) {
 
         User user = userRepository.findById(id)
@@ -145,6 +147,7 @@ public class UserService {
         return userToUserRegisterResponse(user);
     }
 
+    @Transactional
     public void deleteUserById(Long id){
 
         if(userRepository.findById(id).isPresent()){

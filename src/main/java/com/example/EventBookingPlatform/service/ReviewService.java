@@ -15,6 +15,7 @@ import com.example.EventBookingPlatform.repository.EventRepository;
 import com.example.EventBookingPlatform.repository.ReviewRepository;
 import com.example.EventBookingPlatform.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class ReviewService {
         this.bookingRepository = bookingRepository;
     }
 
+    @Transactional
     public ReviewResponse createReview(ReviewRequest reviewRequest, String userEmail, Long eventId) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("this user does not exist"));
@@ -96,7 +98,6 @@ public class ReviewService {
         return reviewToResponse(reviewEntity);
     }
 
-
     public ReviewResponse getReviewById(Long reviewId) {
 
         Review review = reviewRepository.findById(reviewId)
@@ -104,7 +105,6 @@ public class ReviewService {
 
         return reviewToResponse(review);
     }
-
 
     public List<ReviewResponse> getReviewsByEvent(Long eventId) {
 
@@ -122,7 +122,6 @@ public class ReviewService {
         return responses;
     }
 
-
     public List<ReviewResponse> getReviewsByUser(String userEmail) {
 
         User user = userRepository.findByEmail(userEmail)
@@ -139,7 +138,7 @@ public class ReviewService {
         return responses;
     }
 
-
+    @Transactional
     public void deleteReviewById(Long reviewId, String userEmail) {
 
         Review review = reviewRepository.findById(reviewId)
@@ -155,7 +154,6 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-
     public Double getAverageRatingForEvent(Long eventId) {
 
         eventRepository.findById(eventId)
@@ -165,7 +163,6 @@ public class ReviewService {
 
         return averageRating != null ? averageRating : 0.0;
     }
-
 
     public ReviewResponse reviewToResponse(Review review) {
 

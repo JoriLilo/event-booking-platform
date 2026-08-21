@@ -3,6 +3,7 @@ package com.example.EventBookingPlatform.controller;
 import com.example.EventBookingPlatform.dto.UserRegisterRequest;
 import com.example.EventBookingPlatform.dto.UserRegisterResponse;
 import com.example.EventBookingPlatform.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,10 +16,10 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -38,7 +39,10 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserRegisterResponse> updateUser(@PathVariable Long userId,@RequestBody UserRegisterRequest userRegisterRequest) {
+    public ResponseEntity<UserRegisterResponse> updateUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody UserRegisterRequest userRegisterRequest) {
+
         return new ResponseEntity<>(userService.updateUser(userId,userRegisterRequest), HttpStatus.OK);
     }
 

@@ -2,14 +2,19 @@ package com.example.EventBookingPlatform.controller;
 
 import com.example.EventBookingPlatform.dto.EventRequest;
 import com.example.EventBookingPlatform.dto.EventResponse;
+import com.example.EventBookingPlatform.dto.StatusUpdateRequest;
 import com.example.EventBookingPlatform.entity.Status;
 import com.example.EventBookingPlatform.service.EventService;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -24,20 +29,26 @@ public class EventController {
 
     @PostMapping
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<EventResponse> addEvent(@RequestBody EventRequest eventRequest, Authentication authentication) {
+    public ResponseEntity<EventResponse> addEvent(@Valid @RequestBody EventRequest eventRequest, Authentication authentication) {
 
-        String organizerEmail = authentication.getName();
+        String organizerUsername = authentication.getName();
 
-        return new ResponseEntity<>(eventService.createEvent(eventRequest, organizerEmail), HttpStatus.CREATED);
+        return new ResponseEntity<>(eventService.createEvent(eventRequest, organizerUsername), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{eventId}")
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<EventResponse> updateEventStatus(@PathVariable Long eventId, @RequestBody String status, Authentication authentication) {
+    public ResponseEntity<EventResponse> updateEventStatus(
+            @PathVariable Long eventId,
+            @Valid @RequestBody StatusUpdateRequest statusRequest,
+            Authentication authentication) {
 
-        String organizerEmail = authentication.getName();
+        String organizerUsername = authentication.getName();
 
-        return new ResponseEntity<>(eventService.updateEventStatus(eventId, Status.valueOf(status), organizerEmail), HttpStatus.OK);
+        return new ResponseEntity<>(
+                eventService.updateEventStatus(eventId, Status.valueOf(statusRequest.getStatus()), organizerUsername),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping
@@ -57,20 +68,23 @@ public class EventController {
 
     @PutMapping("/{eventId}")
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<EventResponse> updateEvent(@PathVariable Long eventId, @RequestBody EventRequest eventRequest, Authentication authentication) {
+    public ResponseEntity<EventResponse> updateEvent(
+            @PathVariable Long eventId,
+            @Valid @RequestBody EventRequest eventRequest,
+            Authentication authentication) {
 
-        String organizerEmail = authentication.getName();
+        String organizerUsername = authentication.getName();
 
-        return new ResponseEntity<>(eventService.updateEvent(eventId,eventRequest,organizerEmail), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.updateEvent(eventId,eventRequest,organizerUsername), HttpStatus.OK);
     }
 
     @DeleteMapping("/{eventId}")
     @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId, Authentication authentication) {
 
-        String organizerEmail = authentication.getName();
+        String organizerUsername = authentication.getName();
 
-        eventService.deleteEvent(eventId, organizerEmail);
+        eventService.deleteEvent(eventId, organizerUsername);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -79,5 +93,79 @@ public class EventController {
     public ResponseEntity<List<EventResponse>> searchAllEventsByOrganizer(@PathVariable String organizer) {
 
         return new ResponseEntity<>(eventService.getEventsByOrganizer(organizer), HttpStatus.OK);
+    }
+
+    // SEARCH AND FILTER ENDPOINTS
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EventResponse>> searchEvents(
+            @RequestParam String searchTerm,
+            Pageable pageable) {
+
+        return new ResponseEntity<>(eventService.searchEvents(searchTerm, pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/filter/date")
+    public ResponseEntity<Page<EventResponse>> filterByDateRange(
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate,
+            Pageable pageable) {
+
+        return new ResponseEntity<>(
+                eventService.filterByDateRange(startDate, endDate, pageable),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/filter/price")
+    public ResponseEntity<Page<EventResponse>> filterByPriceRange(
+            @RequestParam float minPrice,
+            @RequestParam float maxPrice,
+            Pageable pageable) {
+
+        return new ResponseEntity<>(
+                eventService.filterByPriceRange(minPrice, maxPrice, pageable),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/filter/category/{categoryId}")
+    public ResponseEntity<Page<EventResponse>> filterByCategory(
+            @PathVariable Long categoryId,
+            Pageable pageable) {
+
+        return new ResponseEntity<>(
+                eventService.filterByCategory(categoryId, pageable),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/filter/advanced")
+    public ResponseEntity<Page<EventResponse>> searchWithFilters(
+            @RequestParam String searchTerm,
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate,
+            @RequestParam float minPrice,
+            @RequestParam float maxPrice,
+            Pageable pageable) {
+
+        return new ResponseEntity<>(
+                eventService.searchWithFilters(searchTerm, startDate, endDate, minPrice, maxPrice, pageable),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<Page<EventResponse>> getUpcomingEvents(Pageable pageable) {
+
+        return new ResponseEntity<>(eventService.getUpcomingEvents(pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/venue/{venueId}")
+    public ResponseEntity<Page<EventResponse>> getEventsByVenue(
+            @PathVariable Long venueId,
+            Pageable pageable) {
+
+        return new ResponseEntity<>(eventService.getEventsByVenue(venueId, pageable), HttpStatus.OK);
     }
 }
