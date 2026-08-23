@@ -95,7 +95,8 @@ class EventServiceTest {
     @Test
     void testCreateEventSuccess() {
         when(venueRepository.findById(1L)).thenReturn(Optional.of(venue));
-        when(userRepository.findByUsername("john_organizer")).thenReturn(Optional.of(organizer));
+        // Fixed: Changed from findByUsername to findByEmail
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(organizer));
         when(categoryRepository.findAllById(any())).thenReturn(new ArrayList<>());
 
         // Fix: Set ID when event is saved
@@ -107,7 +108,8 @@ class EventServiceTest {
 
         when(reviewRepository.getAverageRatingForEvent(1L)).thenReturn(null);
 
-        EventResponse response = eventService.createEvent(eventRequest, "john_organizer");
+        // Fixed: Pass email instead of username
+        EventResponse response = eventService.createEvent(eventRequest, "john@example.com");
 
         assertNotNull(response);
         assertEquals("Tech Conference 2024", response.getTitle());
@@ -120,19 +122,19 @@ class EventServiceTest {
     @Test
     void testCreateEventWithNullTitle() {
         eventRequest.setTitle(null);
-        assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(eventRequest, "john_organizer"));
+        assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(eventRequest, "john@example.com"));
     }
 
     @Test
     void testCreateEventWithPastDate() {
         eventRequest.setStartDateTime(LocalDateTime.now().minusDays(1));
-        assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(eventRequest, "john_organizer"));
+        assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(eventRequest, "john@example.com"));
     }
 
     @Test
     void testCreateEventWithNegativePrice() {
         eventRequest.setPrice(-50);
-        assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(eventRequest, "john_organizer"));
+        assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(eventRequest, "john@example.com"));
     }
 
     @Test

@@ -37,7 +37,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse createEvent(EventRequest eventRequest, String organizerUsername) {
+    public EventResponse createEvent(EventRequest eventRequest, String organizerEmail) {
 
         if (eventRequest.getTitle() == null || eventRequest.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -72,7 +72,7 @@ public class EventService {
         event.setVenue(venueRepository.findById(eventRequest.getVenueId())
                 .orElseThrow(() -> new IllegalArgumentException("Venue not found")));
         event.setCategories(categoryRepository.findAllById(eventRequest.getCategoryIds()));
-        event.setUser(userRepository.findByUsername(organizerUsername)
+        event.setUser(userRepository.findByEmail(organizerEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found")));
         event.setStatus(Status.AVAILABLE);
 
@@ -84,12 +84,12 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse updateEventStatus(Long eventId, Status status, String organizerUsername) {
+    public EventResponse updateEventStatus(Long eventId, Status status, String organizerEmail) {
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
-        User organizer = userRepository.findByUsername(organizerUsername)
+        User organizer = userRepository.findByEmail(organizerEmail)
                 .orElseThrow(() -> new UserNotFoundException("Organizer not found"));
 
         if (!event.getUser().getId().equals(organizer.getId())) {
@@ -124,11 +124,14 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse updateEvent(Long eventId, EventRequest eventRequest, String organizerUsername){
+    public EventResponse updateEvent(Long eventId, EventRequest eventRequest, String organizerEmail){
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(()-> new EventNotFoundException("Event not found"));
 
-        if (!event.getUser().getUsername().equals(organizerUsername)) {
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new UserNotFoundException("Organizer not found"));
+
+        if (!event.getUser().getId().equals(organizer.getId())) {
             throw new IllegalArgumentException("You are not the organizer of this event");
         }
 
@@ -169,20 +172,20 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId, String organizerUsername) {
-        User organizer = userRepository.findByUsername(organizerUsername)
-                .orElseThrow(() -> new UserNotFoundException(" User not found "));
+    public void deleteEvent(Long eventId, String organizerEmail) {
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Event event = eventRepository.findByIdAndUser(eventId, organizer)
-                .orElseThrow(() -> new IllegalArgumentException(" Event not found "));
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
         eventRepository.delete(event);
     }
 
-    public List<EventResponse> getEventsByOrganizer(String organizerUsername){
+    public List<EventResponse> getEventsByOrganizer(String organizerEmail){
 
-        User organizer = userRepository.findByUsername(organizerUsername)
-                .orElseThrow(() -> new UserNotFoundException(" User not found "));
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         List<Event> events = eventRepository.findByUser(organizer);
         List<EventResponse> responses = new ArrayList<>();
 
