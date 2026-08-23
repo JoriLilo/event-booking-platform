@@ -39,7 +39,6 @@ class BookingServiceTest {
     @Mock
     private WaitlistService waitlistService;
 
-    @InjectMocks
     private BookingService bookingService;
 
     private BookingRequest bookingRequest;
@@ -89,6 +88,9 @@ class BookingServiceTest {
         booking.setUser(user);
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setBookingDate(LocalDateTime.now());
+
+        // Initialize the service with mocks and cancellation window of 2 hours
+        bookingService = new BookingService(bookingRepository, eventRepository, userRepository, waitlistService, 2);
     }
 
     @Test

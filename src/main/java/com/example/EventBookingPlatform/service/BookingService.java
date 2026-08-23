@@ -9,6 +9,7 @@ import com.example.EventBookingPlatform.exception.UserNotFoundException;
 import com.example.EventBookingPlatform.repository.BookingRepository;
 import com.example.EventBookingPlatform.repository.EventRepository;
 import com.example.EventBookingPlatform.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +24,15 @@ public class BookingService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final WaitlistService waitlistService;
+    private final int cancellationWindowHours;
 
-    public BookingService(BookingRepository bookingRepository, EventRepository eventRepository, UserRepository userRepository, WaitlistService waitlistService) {
+    public BookingService(BookingRepository bookingRepository, EventRepository eventRepository, UserRepository userRepository, WaitlistService waitlistService,
+                          @Value("${booking.cancellation.hours-before:2}") int cancellationWindowHours) {
         this.bookingRepository = bookingRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.waitlistService = waitlistService;
+        this.cancellationWindowHours = cancellationWindowHours;
     }
 
     @Transactional
@@ -87,6 +91,13 @@ public class BookingService {
         }
 
         Event event = booking.getEvent();
+
+        // Cancellation policy: cannot cancel within X hours of event start
+        LocalDateTime now = LocalDateTime.now();
+        if (event.getStartDateTime().isBefore(now.plusHours(cancellationWindowHours))) {
+            throw new IllegalArgumentException(
+                    "Cannot cancel booking within " + cancellationWindowHours + " hours of event start");
+        }
 
         event.setAvailableSeats(event.getAvailableSeats() + booking.getSeatsBooked());
 

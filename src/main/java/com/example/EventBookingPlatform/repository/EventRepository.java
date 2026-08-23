@@ -64,6 +64,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     """)
     Page<Event> findByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
 
+    // Filter by city (via venue)
+    Page<Event> findByVenueCity(String city, Pageable pageable);
+
     // Combined search with multiple filters
     @Query("""
         SELECT e FROM Event e

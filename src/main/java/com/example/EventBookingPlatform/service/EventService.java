@@ -234,6 +234,11 @@ public class EventService {
         return events.map(this::eventToResponse);
     }
 
+    public Page<EventResponse> filterByCity(String city, Pageable pageable) {
+        Page<Event> events = eventRepository.findByVenueCity(city, pageable);
+        return events.map(this::eventToResponse);
+    }
+
     private EventResponse eventToResponse(Event event) {
 
         EventResponse response = new EventResponse();

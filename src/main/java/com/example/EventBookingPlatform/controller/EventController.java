@@ -188,6 +188,20 @@ public class EventController {
         return new ResponseEntity<>(eventService.filterByPriceRange(minPrice, maxPrice, pageable), HttpStatus.OK);
     }
 
+    @GetMapping("/filter/city")
+    @Operation(
+            summary = "Filter Events by City",
+            description = "Filter events by city of the venue"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Filtered events retrieved successfully")
+    })
+    public ResponseEntity<Page<EventResponse>> filterByCity(
+            @RequestParam String city,
+            Pageable pageable) {
+        return new ResponseEntity<>(eventService.filterByCity(city, pageable), HttpStatus.OK);
+    }
+
     @GetMapping("/filter/category/{categoryId}")
     @Operation(
             summary = "Filter Events by Category",
