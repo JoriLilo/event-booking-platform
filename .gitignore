@@ -37,5 +37,3 @@ build/
 .env
 .env.local
 
-### Application config ###
-application-prod.properties
