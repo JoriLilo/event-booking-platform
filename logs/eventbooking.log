@@ -91162,3 +91162,61 @@ select u1_0.id,u1_0.email,u1_0.password,u1_0.role,u1_0.username from users u1_0 
 22:47:58.415 [SpringApplicationShutdownHook] INFO  org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
 22:47:58.619 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
 22:47:58.623 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+19:52:52.938 [main] INFO  org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.EventBookingPlatform.integration.FullBookingFlowIntegrationTest]: FullBookingFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+19:52:52.990 [main] INFO  org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.EventBookingPlatform.EventBookingPlatformApplication for test class com.example.EventBookingPlatform.integration.FullBookingFlowIntegrationTest
+19:52:53.167 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+19:52:53.180 [main] INFO  com.example.EventBookingPlatform.integration.FullBookingFlowIntegrationTest - Starting FullBookingFlowIntegrationTest using Java 21.0.6 with PID 56091 (started by jori in /Users/jori/Desktop/SWE/event-booking-platform)
+19:52:53.182 [main] DEBUG com.example.EventBookingPlatform.integration.FullBookingFlowIntegrationTest - Running with Spring Boot v3.3.4, Spring v6.1.13
+19:52:53.182 [main] INFO  com.example.EventBookingPlatform.integration.FullBookingFlowIntegrationTest - The following 1 profile is active: "test"
+19:52:53.612 [main] INFO  org.springframework.data.repository.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+19:52:53.640 [main] INFO  org.springframework.data.repository.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 24 ms. Found 7 JPA repository interfaces.
+19:52:53.914 [main] INFO  org.hibernate.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+19:52:53.954 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+19:52:53.976 [main] INFO  org.hibernate.cache.internal.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+19:52:54.141 [main] INFO  org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+19:52:54.913 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+19:52:55.053 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+19:52:55.054 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+19:52:55.079 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+19:52:55.696 [main] INFO  org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+19:52:55.733 [main] INFO  org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+19:52:55.928 [main] INFO  org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+19:52:55.972 [main] INFO  org.springframework.data.jpa.repository.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+19:52:56.667 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+19:52:57.078 [main] DEBUG com.example.EventBookingPlatform.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+19:52:57.078 [main] INFO  org.springframework.boot.test.mock.web.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+19:52:57.078 [main] INFO  org.springframework.test.web.servlet.TestDispatcherServlet - Initializing Servlet ''
+19:52:57.079 [main] INFO  org.springframework.test.web.servlet.TestDispatcherServlet - Completed initialization in 1 ms
+19:52:57.092 [main] INFO  com.example.EventBookingPlatform.integration.FullBookingFlowIntegrationTest - Started FullBookingFlowIntegrationTest in 4.023 seconds (process running for 4.939)
+19:52:58.486 [main] WARN  org.springframework.data.web.config.SpringDataJacksonConfiguration$PageModule$WarningLoggingModifier - Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+19:52:58.711 [main] INFO  org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.EventBookingPlatform.integration.EventBookingIntegrationTest]: EventBookingIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+19:52:58.719 [main] INFO  org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.EventBookingPlatform.EventBookingPlatformApplication for test class com.example.EventBookingPlatform.integration.EventBookingIntegrationTest
+19:52:59.244 [main] INFO  org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.example.EventBookingPlatform.EventBookingPlatformApplicationTests]: EventBookingPlatformApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+19:52:59.248 [main] INFO  org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.example.EventBookingPlatform.EventBookingPlatformApplication for test class com.example.EventBookingPlatform.EventBookingPlatformApplicationTests
+19:52:59.266 [main] INFO  com.example.EventBookingPlatform.EventBookingPlatformApplicationTests - Starting EventBookingPlatformApplicationTests using Java 21.0.6 with PID 56091 (started by jori in /Users/jori/Desktop/SWE/event-booking-platform)
+19:52:59.267 [main] DEBUG com.example.EventBookingPlatform.EventBookingPlatformApplicationTests - Running with Spring Boot v3.3.4, Spring v6.1.13
+19:52:59.267 [main] INFO  com.example.EventBookingPlatform.EventBookingPlatformApplicationTests - No active profile set, falling back to 1 default profile: "default"
+19:52:59.363 [main] INFO  org.springframework.data.repository.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+19:52:59.370 [main] INFO  org.springframework.data.repository.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 5 ms. Found 7 JPA repository interfaces.
+19:52:59.437 [main] INFO  org.hibernate.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+19:52:59.439 [main] INFO  org.hibernate.cache.internal.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+19:52:59.443 [main] INFO  org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+19:52:59.443 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+19:52:59.755 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@b6d99bc
+19:52:59.756 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+19:52:59.793 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+19:52:59.793 [main] WARN  org.hibernate.orm.deprecation - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+19:52:59.874 [main] INFO  org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+19:53:00.616 [main] INFO  org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+19:53:00.649 [main] INFO  org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+19:53:00.718 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+19:53:00.863 [main] INFO  com.example.EventBookingPlatform.EventBookingPlatformApplicationTests - Started EventBookingPlatformApplicationTests in 1.612 seconds (process running for 8.71)
+19:53:02.022 [SpringApplicationShutdownHook] INFO  org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+19:53:02.033 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+19:53:02.034 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+19:53:02.040 [SpringApplicationShutdownHook] INFO  org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+19:53:02.041 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+19:53:02.096 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
